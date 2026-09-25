@@ -1,10 +1,6 @@
-Execution Map
+# Execution Map — AI Lead/Data Classification Automation
 
-Project
-
-AI Lead/Data Classification Automation
-
-Target
+## Target
 
 Build and verify a portfolio-ready lead management automation system that can:
 
@@ -23,117 +19,185 @@ Build and verify a portfolio-ready lead management automation system that can:
 
 ---
 
-Execution Rules
+# V3.1 Execution Contract
 
-Each step contains:
+## Execution Cycle
 
-- Objective
-- Actions
-- Entry Condition
-- Exit Criteria
-- Auto Execute
-- User Decision Required
-- Evidence Required
-- Next Step
+The AI follows:
 
-The AI should execute consecutive steps automatically when no user decision is required.
+`READ STATE → IDENTIFY NEXT ACTION → CHECK GATES → EXECUTE → TEST → EVALUATE EVIDENCE → UPDATE STATE → CHECK STOP CONDITIONS → CONTINUE OR STOP`
 
-The AI must not stop merely because a step has been completed.
+The AI may execute multiple steps in one cycle.
 
-The AI should continue until:
+There is no arbitrary step-count stop.
 
-- a genuine Decision Gate is reached
-- the project is Blocked
-- the Target Completion Criteria are satisfied
+## Lazy Context Loading
+
+Default context:
+
+1. `PROJECT_STATE.md`
+2. relevant section of this map
+3. relevant `AI_PROTOCOL.md` rules
+4. `PROJECT_ARCHITECTURE.md` when architecture is relevant
+5. `DECISIONS.md` when decisions are relevant
+6. only the source files required for the current action
+
+Expand context when evidence reveals a conflict or missing information.
+
+## Stop Conditions
+
+Execution stops only at:
+
+- `DECISION_REQUIRED`
+- `CONFLICT`
+- `BLOCKED`
+- `BUDGET_EXHAUSTED`
+- `TARGET_COMPLETE`
+
+Completing an ordinary step is not itself a stop condition.
+
+## Evidence Gate
+
+Every step follows:
+
+`TODO → IMPLEMENTED → TESTED → VERIFIED → DONE`
+
+A step is DONE only when its implementation, relevant tests/checks, acceptance criteria, and state documentation are verified.
+
+## Decision Gate
+
+A Decision Gate is required only for:
+
+- strategic direction
+- architecture or scope changes
+- material tradeoffs
+- irreversible actions
+- business information that cannot safely be inferred
+
+Before stopping, complete independent work, verify it, update state, and record the required decision.
+
+## Conflict Gate
+
+If state, repository, architecture, or decisions disagree:
+
+1. detect
+2. collect evidence
+3. check existing decisions
+4. resolve automatically when determinable
+5. otherwise stop as `CONFLICT`
+
+Never silently choose between conflicting sources.
+
+## Execution Budget
+
+Execution may be bounded by:
+
+```yaml
+budget:
+  max_steps: null
+  max_tool_calls: null
+  max_retries: null
+  max_runtime_minutes: null
+```
+
+Budget is a safety boundary, not a progress target.
+
+When exhausted, preserve work, update `PROJECT_STATE.md`, record the exact stop reason, and stop.
+
+## Git Checkpoint
+
+Preferred cycle:
+
+`KNOWN GOOD COMMIT → MODIFY → TEST → PASS → COMMIT`
+
+Use recoverable checkpoints after verified milestones. Do not create a branch for every step.
 
 ---
 
-PHASE 1 — DISCOVERY
+# PHASE 1 — DISCOVERY
 
-Step 1 — Select Real Problem
+## Step 1 — Select Real Problem
 
-Objective
+**Objective**
 
-Identify a concrete business problem from LinkedIn that is suitable for a portfolio project.
+Identify a concrete business problem from LinkedIn suitable for a portfolio project.
 
-Status
+**Status**
 
 DONE
 
-Result
+**Result**
 
 Selected problem:
 
 Unstructured lead information requires repetitive manual interpretation, qualification, prioritization, routing, and storage.
 
-Evidence
+**Evidence**
 
 LinkedIn problem research and documented problem pattern.
 
-Next Step
+**Next Step**
 
 Step 2
 
 ---
 
-Step 2 — Problem Definition
+## Step 2 — Problem Definition
 
-Objective
+**Objective**
 
 Define the problem precisely enough to build against it.
 
-Status
+**Status**
 
 DONE
 
-Exit Criteria
+**Exit Criteria**
 
 - problem clearly defined
 - affected workflow identified
 - repetitive work identified
 - expected value identified
 
-Next Step
+**Next Step**
 
 Step 3
 
 ---
 
-Step 3 — Business Simulation
+## Step 3 — Business Simulation
 
-Objective
+**Objective**
 
 Create a realistic business context for the project.
 
-Status
+**Status**
 
 DONE
 
-Result
-
-Simulation:
+**Result**
 
 A B2B software/automation agency receives prospective client inquiries and needs to process and qualify them efficiently.
 
-Next Step
+**Next Step**
 
 Step 4
 
 ---
 
-PHASE 2 — SYSTEM DESIGN
+# PHASE 2 — SYSTEM DESIGN
 
-Step 4 — System Requirements
+## Step 4 — System Requirements
 
-Objective
+**Objective**
 
 Define what the system must do.
 
-Status
+**Status**
 
 DONE
 
-Core Requirements
+**Core Requirements**
 
 - receive lead input
 - normalize data
@@ -149,27 +213,27 @@ Core Requirements
 - maintain audit history
 - handle failures
 
-Next Step
+**Next Step**
 
 Step 5
 
 ---
 
-Step 5 — Architecture Selection
+## Step 5 — Architecture Selection
 
-Objective
+**Objective**
 
 Choose the system architecture.
 
-Status
+**Status**
 
 DONE
 
-Selected Architecture
+**Selected Architecture**
 
 Stateful Workflow + AI + Deterministic Rules + Human Approval + Audit Log
 
-Principle
+**Principle**
 
 AI interprets unstructured information.
 
@@ -179,23 +243,23 @@ Human approval handles uncertain or important decisions.
 
 The system maintains state and an audit trail.
 
-Next Step
+**Next Step**
 
 Step 6
 
 ---
 
-Step 6 — Technology Stack
+## Step 6 — Technology Stack
 
-Objective
+**Objective**
 
 Select the initial implementation stack.
 
-Status
+**Status**
 
 DONE
 
-Initial Stack
+**Initial Stack**
 
 - Python
 - FastAPI
@@ -207,81 +271,94 @@ Initial Stack
 - HTML/CSS/JavaScript for a simple interface
 - Git/GitHub
 
-Design Principle
+**Design Principle**
 
-The AI provider must be replaceable without rewriting the application logic.
+The AI provider must be replaceable without rewriting application logic.
 
-Next Step
+**Next Step**
 
 Step 7
 
 ---
 
-PHASE 3 — PROJECT FOUNDATION
+# PHASE 3 — PROJECT FOUNDATION
 
-Step 7 — Repository and Project Setup
+## Step 7 — Repository and Project Setup
 
-Objective
+**Objective**
 
 Create the initial project structure and establish a reproducible development baseline.
 
-Entry Condition
+**Status**
 
-Steps 1–6 are complete.
+DONE
 
-Actions
+**Entry Condition**
 
-1. Create or select the project repository.
-2. Define project structure.
-3. Initialize application.
-4. Configure dependencies.
-5. Configure environment handling.
-6. Create initial documentation.
-7. Create initial tests.
-8. Run the project.
-9. Verify the baseline.
-10. Commit the working baseline.
+Steps 1–6 complete.
 
-Auto Execute
+**Actions**
+
+1. create or select the project repository
+2. define project structure
+3. initialize application foundation
+4. configure dependency declarations
+5. configure environment handling
+6. create initial documentation
+7. create initial tests
+8. establish Git history
+9. synchronize the repository with GitHub
+10. verify the repository baseline
+
+**Auto Execute**
 
 YES
 
-User Decision Required
+**User Decision Required**
 
-Only if repository ownership, repository choice, licensing, or another strategic project-level decision is unresolved.
+Only if repository ownership, licensing, or another strategic project-level decision is unresolved.
 
-Exit Criteria
+**Exit Criteria**
 
 - repository exists
 - project structure exists
-- application starts
-- dependencies resolve
-- baseline test runs
-- repository state is clean and documented
-- initial commit exists
+- application foundation exists
+- dependency declarations exist
+- environment template exists
+- baseline test exists
+- Git history exists
+- repository is synchronized
+- project state is documented
 
-Evidence Required
+Runtime execution of the full Python stack is verified separately in the appropriate Linux/Codespaces environment.
 
-- repository state
-- successful application startup
-- successful baseline test
-- commit
+**Evidence**
 
-Next Step
+- repository: `mrfz011007-creator/ai-lead-classification`
+- initial project foundation commit exists
+- V3.1 protocol committed
+- `PROJECT_STATE.md` updated
+- GitHub repository synchronized
+
+**Next Step**
 
 Step 8
 
 ---
 
-PHASE 4 — DATA FOUNDATION
+# PHASE 4 — DATA FOUNDATION
 
-Step 8 — Lead Data Model
+## Step 8 — Lead Data Model
 
-Objective
+**Objective**
 
 Define the internal representation of a lead and its processing state.
 
-Actions
+**Status**
+
+TODO
+
+**Actions**
 
 - define lead schema
 - define normalized fields
@@ -290,35 +367,35 @@ Actions
 - define validation rules
 - create model tests
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-User Decision Required
+**User Decision Required**
 
 Only if the data model reveals a significant business ambiguity that cannot be resolved technically.
 
-Exit Criteria
+**Exit Criteria**
 
-Lead data model is implemented and validated.
+Lead data model is implemented, tested, and validated against representative examples.
 
-Evidence Required
+**Evidence Required**
 
 Schema tests and representative examples.
 
-Next Step
+**Next Step**
 
 Step 9
 
 ---
 
-Step 9 — Input and Normalization Layer
+## Step 9 — Input and Normalization Layer
 
-Objective
+**Objective**
 
 Convert raw lead input into a consistent internal format.
 
-Actions
+**Actions**
 
 - define input format
 - normalize values
@@ -327,35 +404,35 @@ Actions
 - handle malformed input
 - create tests
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 Valid and invalid inputs are handled predictably.
 
-Evidence Required
+**Evidence Required**
 
 Automated tests.
 
-Next Step
+**Next Step**
 
 Step 10
 
 ---
 
-PHASE 5 — AI PROCESSING
+# PHASE 5 — AI PROCESSING
 
-Step 10 — AI Extraction Layer
+## Step 10 — AI Extraction Layer
 
-Objective
+**Objective**
 
 Use an LLM to interpret unstructured lead information and produce structured data.
 
-Expected Output
+**Expected Output**
 
-Examples include:
+Examples:
 
 - name
 - company
@@ -370,7 +447,7 @@ Examples include:
 - summary
 - confidence
 
-Rules
+**Rules**
 
 - never invent missing information
 - represent unavailable information as null
@@ -378,35 +455,35 @@ Rules
 - validate output against schema
 - isolate provider-specific code
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-User Decision Required
+**User Decision Required**
 
 Only if provider, cost, privacy, or another strategic constraint requires a user decision.
 
-Exit Criteria
+**Exit Criteria**
 
 Representative inputs produce valid structured outputs.
 
-Evidence Required
+**Evidence Required**
 
 Automated validation and representative test cases.
 
-Next Step
+**Next Step**
 
 Step 11
 
 ---
 
-Step 11 — AI Output Validation
+## Step 11 — AI Output Validation
 
-Objective
+**Objective**
 
 Ensure AI-generated data cannot directly corrupt downstream processing.
 
-Actions
+**Actions**
 
 - schema validation
 - type validation
@@ -414,39 +491,39 @@ Actions
 - invalid-output handling
 - retry/failure strategy where appropriate
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 Invalid AI output is detected and handled safely.
 
-Evidence Required
+**Evidence Required**
 
 Positive and negative tests.
 
-Next Step
+**Next Step**
 
 Step 12
 
 ---
 
-PHASE 6 — BUSINESS LOGIC
+# PHASE 6 — BUSINESS LOGIC
 
-Step 12 — Qualification Engine
+## Step 12 — Qualification Engine
 
-Objective
+**Objective**
 
 Apply deterministic business rules to classify and prioritize leads.
 
-Principle
+**Principle**
 
 AI extracts information.
 
 Rules determine qualification.
 
-Initial Example
+**Initial Example**
 
 - clear business need: +20
 - budget known: +20
@@ -456,175 +533,167 @@ Initial Example
 - information-only inquiry: -20
 - unclear need: -20
 
-Initial classification:
+**Initial Classification**
 
 - 80–100: HOT
 - 50–79: WARM
 - 0–49: COLD
 
-These values are a V1 simulation and must not be treated as universal business rules.
+These values are a V1 simulation and are not universal business rules.
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-User Decision Required
+**User Decision Required**
 
-Only if business rules require a strategic business judgment.
+Only if business rules require strategic business judgment.
 
-Exit Criteria
+**Exit Criteria**
 
 Given the same input, the qualification engine produces deterministic results.
 
-Evidence Required
+**Evidence Required**
 
 Unit tests covering scoring boundaries and edge cases.
 
-Next Step
+**Next Step**
 
 Step 13
 
 ---
 
-Step 13 — Duplicate Detection
+## Step 13 — Duplicate Detection
 
-Objective
+**Objective**
 
 Detect potentially duplicated leads before creating conflicting records.
 
-Actions
+**Actions**
 
 - define duplicate signals
 - implement matching logic
 - distinguish exact and potential duplicates
 - test false-positive scenarios
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 Duplicate detection behaves predictably on representative cases.
 
-Evidence Required
+**Evidence Required**
 
 Automated tests.
 
-Next Step
+**Next Step**
 
 Step 14
 
 ---
 
-PHASE 7 — STATE AND HUMAN CONTROL
+# PHASE 7 — STATE AND HUMAN CONTROL
 
-Step 14 — Stateful Processing
+## Step 14 — Stateful Processing
 
-Objective
+**Objective**
 
 Track the lead through the processing lifecycle.
 
-Example States
+**Example States**
 
-RECEIVED
-→ NORMALIZED
-→ ANALYZED
-→ VALIDATED
-→ QUALIFIED
-→ ROUTED
-→ APPROVAL_REQUIRED
-→ APPROVED
-→ COMPLETED
+`RECEIVED → NORMALIZED → ANALYZED → VALIDATED → QUALIFIED → ROUTED → APPROVAL_REQUIRED → APPROVED → COMPLETED`
 
 Failure states must also be represented.
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 State transitions are explicit, valid, and testable.
 
-Evidence Required
+**Evidence Required**
 
 State transition tests.
 
-Next Step
+**Next Step**
 
 Step 15
 
 ---
 
-Step 15 — Human Approval
+## Step 15 — Human Approval
 
-Objective
+**Objective**
 
 Allow human intervention when the system should not act automatically.
 
-Actions
+**Actions**
 
 - identify approval conditions
 - expose relevant information
 - allow approval/rejection
 - preserve decision history
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-User Decision Required
+**User Decision Required**
 
 Only if an actual product-level approval policy is unresolved.
 
-Exit Criteria
+**Exit Criteria**
 
 The system can pause processing, request approval, record the decision, and continue.
 
-Evidence Required
+**Evidence Required**
 
 Approval workflow test.
 
-Next Step
+**Next Step**
 
 Step 16
 
 ---
 
-PHASE 8 — STORAGE AND AUDIT
+# PHASE 8 — STORAGE AND AUDIT
 
-Step 16 — Persistence
+## Step 16 — Persistence
 
-Objective
+**Objective**
 
 Persist leads, processing state, qualification results, and relevant metadata.
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 Data survives application restart and can be retrieved correctly.
 
-Evidence Required
+**Evidence Required**
 
 Persistence tests.
 
-Next Step
+**Next Step**
 
 Step 17
 
 ---
 
-Step 17 — Audit Log
+## Step 17 — Audit Log
 
-Objective
+**Objective**
 
 Record important processing events so the system can explain what happened.
 
-Record Examples
+**Record Examples**
 
 - input received
 - AI analysis performed
@@ -635,33 +704,33 @@ Record Examples
 - human approval
 - failure/retry
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 Important processing events are traceable.
 
-Evidence Required
+**Evidence Required**
 
 Audit-log test.
 
-Next Step
+**Next Step**
 
 Step 18
 
 ---
 
-PHASE 9 — FAILURE HANDLING
+# PHASE 9 — FAILURE HANDLING
 
-Step 18 — Failure and Recovery
+## Step 18 — Failure and Recovery
 
-Objective
+**Objective**
 
 Make the system resilient to expected failures.
 
-Cases
+**Cases**
 
 - invalid input
 - invalid AI output
@@ -672,95 +741,87 @@ Cases
 - database failure
 - unexpected exception
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 Expected failures produce controlled behavior rather than silent corruption.
 
-Evidence Required
+**Evidence Required**
 
 Failure-path tests.
 
-Next Step
+**Next Step**
 
 Step 19
 
 ---
 
-PHASE 10 — INTERFACE AND INTEGRATION
+# PHASE 10 — INTERFACE AND INTEGRATION
 
-Step 19 — Application Interface
+## Step 19 — Application Interface
 
-Objective
+**Objective**
 
 Provide a simple interface for submitting and reviewing leads.
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 A user can submit a lead and inspect the resulting processing information.
 
-Evidence Required
+**Evidence Required**
 
 Working end-to-end demonstration.
 
-Next Step
+**Next Step**
 
 Step 20
 
 ---
 
-Step 20 — End-to-End Integration
+## Step 20 — End-to-End Integration
 
-Objective
+**Objective**
 
 Connect the complete pipeline.
 
-Flow
+**Flow**
 
-Raw Lead
-→ Normalize
-→ AI Analysis
-→ Validate
-→ Qualify
-→ Duplicate Check
-→ Store
-→ Route / Approval
-→ Audit
+`Raw Lead → Normalize → AI Analysis → Validate → Qualify → Duplicate Check → Store → Route / Approval → Audit`
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 The complete flow works with representative scenarios.
 
-Evidence Required
+**Evidence Required**
 
 End-to-end tests and demonstration.
 
-Next Step
+**Next Step**
 
 Step 21
 
 ---
 
-PHASE 11 — VERIFICATION
+# PHASE 11 — VERIFICATION
 
-Step 21 — System Testing
+## Step 21 — System Testing
 
-Objective
+**Objective**
 
 Verify the system as a whole.
 
-Actions
+**Actions**
 
 - unit tests
 - integration tests
@@ -768,31 +829,31 @@ Actions
 - edge cases
 - representative business scenarios
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 All defined acceptance criteria are satisfied or explicitly documented.
 
-Evidence Required
+**Evidence Required**
 
 Test results.
 
-Next Step
+**Next Step**
 
 Step 22
 
 ---
 
-Step 22 — Portfolio Documentation
+## Step 22 — Portfolio Documentation
 
-Objective
+**Objective**
 
 Document the project as evidence of engineering ability.
 
-Documentation
+**Documentation**
 
 - problem
 - why it matters
@@ -807,53 +868,53 @@ Documentation
 - limitations
 - future improvements
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 Another developer can understand the project and reproduce the core result.
 
-Evidence Required
+**Evidence Required**
 
 Complete repository documentation.
 
-Next Step
+**Next Step**
 
 Step 23
 
 ---
 
-PHASE 12 — FINAL VERIFICATION
+# PHASE 12 — FINAL VERIFICATION
 
-Step 23 — Target Verification
+## Step 23 — Target Verification
 
-Objective
+**Objective**
 
 Determine whether the original project target has actually been achieved.
 
-Verification
+**Verification**
 
 Check every target requirement from the beginning of this map.
 
-Auto Execute
+**Auto Execute**
 
 YES
 
-Exit Criteria
+**Exit Criteria**
 
 All required capabilities are implemented, tested, verified, and documented.
 
-Evidence Required
+**Evidence Required**
 
 Final verification checklist and test results.
 
-Result
+**Result**
 
 If all criteria pass:
 
-"COMPLETED"
+`COMPLETED`
 
 Otherwise:
 
@@ -861,21 +922,7 @@ Return to the relevant step.
 
 ---
 
-Decision Gate Rules
-
-A Decision Gate may interrupt execution at any step when:
-
-1. a strategic choice is required
-2. two or more materially different valid paths exist
-3. the choice changes architecture or project direction
-4. required business information cannot be inferred safely
-5. the decision is irreversible or expensive to reverse
-
-The AI must not create a Decision Gate merely because a technical choice exists.
-
----
-
-Completion Criteria
+# Completion Contract
 
 The project is complete only when:
 
@@ -893,3 +940,6 @@ The project is complete only when:
 - tests provide evidence
 - documentation explains the system
 - portfolio evidence is reproducible
+
+The final state must be reproducible from the GitHub repository.
+
