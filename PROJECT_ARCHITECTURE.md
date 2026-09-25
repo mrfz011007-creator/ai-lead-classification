@@ -1,18 +1,10 @@
-Project Architecture
+# Project Architecture — AI Lead/Data Classification Automation
 
-Project
+## 1. Purpose
 
-AI Lead/Data Classification Automation
+The system processes unstructured lead information and converts it into structured, validated, qualified, and actionable lead data.
 
----
-
-1. Purpose
-
-The system is designed to process unstructured lead information and convert it into structured, validated, qualified, and actionable lead data.
-
-The system should reduce repetitive manual work while keeping important business decisions reviewable by humans.
-
-The system is a portfolio project intended to demonstrate:
+It is a portfolio project demonstrating:
 
 - business problem understanding
 - workflow design
@@ -26,20 +18,25 @@ The system is a portfolio project intended to demonstrate:
 - testing
 - failure handling
 
+The architecture describes the intended product. It must not be confused with the V3.1 execution framework used to build and verify the product.
+
 ---
 
-2. Core Principle
+## 2. Core Principle
+
+**AI interprets. Deterministic code controls predictable rules. Humans control important decisions.**
 
 AI is responsible for interpretation and extraction.
 
-Deterministic application logic is responsible for validation, qualification, state transitions, and other rules that should produce predictable results.
+Deterministic application logic is responsible for validation, qualification, state transitions, duplicate handling, and other predictable rules.
 
-Humans remain responsible for important decisions when the system is uncertain or when an action has meaningful business consequences.
+Humans remain responsible for important decisions when uncertainty or business consequences make automation inappropriate.
 
 ---
 
-3. High-Level Architecture
+## 3. High-Level Architecture
 
+```
 Lead Input
     ↓
 Input Normalization
@@ -54,31 +51,24 @@ Duplicate Detection
     ↓
 State Management
     ↓
- ┌───────────────────────┐
- │ Human Approval Needed?│
- └───────────┬───────────┘
-             │
-       Yes   │   No
-        ↓    │    ↓
- Human Review│ Continue
-        ↓    │
- Approval / Rejection
-        ↓
- Persistence
-        ↓
- Audit Log
-        ↓
- Recommendation / Routing
+Human Approval if Required
+    ↓
+Persistence
+    ↓
+Audit Log
+    ↓
+Recommendation / Routing
+```
+
+The exact implementation may change only when requirements or evidence justify it.
 
 ---
 
-4. Main Components
+## 4. Main Components
 
-4.1 API Layer
+### 4.1 API Layer
 
-Technology:
-
-- FastAPI
+**Technology:** FastAPI
 
 Responsibilities:
 
@@ -90,9 +80,7 @@ Responsibilities:
 
 The API layer should not contain the main business logic.
 
----
-
-4.2 Input and Normalization Layer
+### 4.2 Input and Normalization Layer
 
 Responsibilities:
 
@@ -100,19 +88,9 @@ Responsibilities:
 - normalize basic input
 - clean obvious formatting inconsistencies
 - create a consistent internal representation
+- preserve original input for auditing
 
-Examples:
-
-- normalize whitespace
-- normalize empty values
-- normalize basic contact information
-- preserve the original input
-
-The original input must remain available for auditing.
-
----
-
-4.3 AI Layer
+### 4.3 AI Layer
 
 Responsibilities:
 
@@ -132,40 +110,32 @@ Expected information may include:
 - volume
 - budget
 - timeline
-- decision-maker status
+- decision-maker information
 - pain points
 - summary
 - confidence
 
-The AI must not invent information that is absent from the source.
+The AI must not invent information absent from the source. Unknown information should be represented explicitly as `null` or another defined unknown state.
 
-Unknown information should be represented as "null" or another explicitly defined unknown state.
+### 4.4 AI Provider Interface
 
----
+The application communicates with AI through an internal abstraction:
 
-4.4 AI Provider Interface
-
-The application should communicate with AI through an internal abstraction.
-
+```
 Application
-     ↓
+    ↓
 AI Interface
-     ↓
+    ↓
 AI Provider
+```
 
-This prevents the application from becoming tightly coupled to one AI provider.
+This prevents tight coupling to one provider and allows replacement without redesigning application logic.
 
-A provider can be replaced without redesigning the entire application.
-
----
-
-4.5 AI Output Validation
+### 4.5 AI Output Validation
 
 All AI-generated structured data must pass validation before entering downstream business logic.
 
-Technology:
-
-- Pydantic
+**Technology:** Pydantic
 
 Responsibilities:
 
@@ -173,13 +143,11 @@ Responsibilities:
 - validate data types
 - validate allowed values
 - reject malformed output
-- prevent unexpected fields when appropriate
+- prevent unexpected fields where appropriate
 
-Invalid AI output must not silently continue through the workflow.
+Invalid AI output must not silently continue.
 
----
-
-4.6 Qualification Engine
+### 4.6 Qualification Engine
 
 The qualification engine uses deterministic rules.
 
@@ -193,20 +161,16 @@ Example factors:
 - information-only intent
 - unclear requirements
 
-The initial scoring model is a prototype and may be changed after testing.
-
-The engine should produce:
+The prototype produces:
 
 - score
 - qualification category
 - reasons
 - recommended priority
 
-The qualification result must be reproducible from the same input and rules.
+The scoring model is a V1 simulation and may change after testing.
 
----
-
-4.7 Duplicate Detection
+### 4.7 Duplicate Detection
 
 Responsibilities:
 
@@ -215,56 +179,52 @@ Responsibilities:
 - prevent unnecessary duplicate processing
 - preserve existing records when appropriate
 
-Duplicate detection should distinguish between:
+Distinguish:
 
 - confirmed duplicate
 - possible duplicate
 - unique lead
 
-The system should avoid destructive automatic merging when confidence is insufficient.
+Avoid destructive automatic merging when confidence is insufficient.
 
----
+### 4.8 State Management
 
-4.8 State Management
+Conceptual states:
 
-Each lead moves through defined processing states.
-
-Initial conceptual states:
-
+```
 RECEIVED
-    ↓
+  ↓
 NORMALIZED
-    ↓
+  ↓
 ANALYZED
-    ↓
+  ↓
 VALIDATED
-    ↓
+  ↓
 QUALIFIED
-    ↓
+  ↓
 DUPLICATE_CHECKED
-    ↓
+  ↓
 AWAITING_APPROVAL
-    ↓
+  ↓
 APPROVED / REJECTED
-    ↓
+  ↓
 COMPLETED
+```
 
 Failure states may be introduced where required.
 
 State transitions must be explicit and testable.
 
----
+### 4.9 Human Approval
 
-4.9 Human Approval
-
-Human approval is required when:
+Human approval may be required when:
 
 - the system is uncertain
 - an important business decision cannot safely be automated
 - duplicate detection is ambiguous
 - a high-impact action requires confirmation
 
-The system should present enough information for the human to understand why the lead reached the approval stage.
+The system should present enough information for the human to understand why approval is required.
 
 Possible actions:
 
@@ -273,16 +233,14 @@ Possible actions:
 - modify
 - request further processing
 
----
-
-4.10 Persistence Layer
+### 4.10 Persistence Layer
 
 Initial technology:
 
 - SQLite
 - SQLAlchemy
 
-The persistence layer stores relevant information such as:
+Stores relevant information such as:
 
 - lead records
 - normalized data
@@ -292,15 +250,11 @@ The persistence layer stores relevant information such as:
 - approval decisions
 - audit information
 
-The database implementation should remain replaceable if the project later requires PostgreSQL.
+The database implementation should remain replaceable if PostgreSQL becomes justified.
 
----
+### 4.11 Audit Log
 
-4.11 Audit Log
-
-Important system events should be recorded.
-
-Examples:
+Important system events should be recorded:
 
 - lead received
 - normalization completed
@@ -315,13 +269,9 @@ Examples:
 
 The audit log should make it possible to understand what happened to a lead and when.
 
----
+### 4.12 Failure and Recovery
 
-4.12 Failure and Recovery
-
-The system must explicitly handle important failures.
-
-Examples:
+Expected failures include:
 
 - AI provider unavailable
 - timeout
@@ -336,13 +286,14 @@ The system should:
 1. detect the failure
 2. preserve relevant information
 3. record the failure
-4. place the process in an appropriate state
+4. place processing in an appropriate state
 5. allow recovery or human intervention when possible
 
 ---
 
-5. Data Flow
+## 5. Data Flow
 
+```
 Raw Lead
    ↓
 Normalized Lead
@@ -362,32 +313,32 @@ Human Approval (if required)
 Stored Result
    ↓
 Audit History
+```
 
-The original raw input should remain distinguishable from transformed or AI-generated data.
-
----
-
-6. Separation of Responsibilities
-
-The system should maintain clear boundaries.
-
-Responsibility| Primary Owner
-Receiving input| API/Application
-Normalization| Application
-Interpretation| AI
-Extraction| AI
-Schema validation| Pydantic/Application
-Qualification rules| Deterministic code
-State transitions| Application
-Duplicate detection| Application
-Business approval| Human
-Persistence| Database layer
-Audit history| Application
-Error handling| Application
+Original raw input must remain distinguishable from transformed or AI-generated data.
 
 ---
 
-7. Technology Baseline
+## 6. Separation of Responsibilities
+
+| Responsibility | Primary Owner |
+|---|---|
+| Receiving input | API/Application |
+| Normalization | Application |
+| Interpretation | AI |
+| Extraction | AI |
+| Schema validation | Pydantic/Application |
+| Qualification rules | Deterministic code |
+| State transitions | Application |
+| Duplicate detection | Application |
+| Business approval | Human |
+| Persistence | Database layer |
+| Audit history | Application |
+| Error handling | Application |
+
+---
+
+## 7. Technology Baseline
 
 Initial stack:
 
@@ -402,13 +353,15 @@ Initial stack:
 - GitHub
 - HTML/CSS/JavaScript for the initial interface
 
-Technology may be changed later only when evidence or project requirements justify the change.
+Technology changes require evidence or project requirements.
+
+The runtime environment is intentionally separated from the architecture specification; the local Android environment is not assumed to support every dependency.
 
 ---
 
-8. Design Constraints
+## 8. Design Constraints
 
-The project should prioritize:
+Priorities:
 
 1. correctness
 2. reproducibility
@@ -418,27 +371,27 @@ The project should prioritize:
 6. observability
 7. clear separation of responsibilities
 
-The project should not introduce complexity merely to make the architecture appear advanced.
+Do not introduce complexity merely to make the architecture appear advanced.
+
+Future features such as agents, queues, background workers, external integrations, or multiple databases require an actual requirement or measurable benefit.
 
 ---
 
-9. Security and Configuration
+## 9. Security and Configuration
 
-Secrets must not be hardcoded into source code.
-
-API keys and other credentials must be supplied through environment configuration or an equivalent secure mechanism.
-
-Sensitive lead information should not be unnecessarily exposed in logs.
+- never hardcode secrets
+- supply API keys through environment configuration or an equivalent secure mechanism
+- never commit `.env` containing secrets
+- avoid unnecessarily exposing sensitive lead information in logs
+- keep credentials out of tests, commits, and diagnostic output
 
 ---
 
-10. Testing Strategy
+## 10. Testing Strategy
 
-Testing should occur at multiple levels.
+### Unit Tests
 
-Unit Tests
-
-Test individual components such as:
+Test components such as:
 
 - normalization
 - validation
@@ -446,7 +399,7 @@ Test individual components such as:
 - duplicate detection
 - state transitions
 
-Integration Tests
+### Integration Tests
 
 Test interactions between:
 
@@ -454,18 +407,19 @@ Test interactions between:
 - AI interface and provider
 - application and database
 
-End-to-End Tests
+### End-to-End Tests
 
-Test the complete lead processing flow from input to final state.
+Test the complete lead-processing flow from input to final state.
 
-Failure Tests
+### Failure Tests
 
-Verify expected behavior when dependencies or inputs fail.
+Verify controlled behavior when dependencies or inputs fail.
 
-A feature should not be considered complete merely because its implementation exists.
+### Evidence Gate
 
-Expected evidence progression:
+A feature progresses:
 
+```
 IMPLEMENTED
     ↓
 TESTED
@@ -473,14 +427,15 @@ TESTED
 VERIFIED
     ↓
 DONE
+```
+
+Implementation alone is not completion evidence.
 
 ---
 
-11. Architecture Evolution
+## 11. Architecture Evolution
 
-The architecture is intentionally designed to support future expansion.
-
-Potential future additions may include:
+Potential future additions:
 
 - multiple AI providers
 - PostgreSQL
@@ -492,33 +447,54 @@ Potential future additions may include:
 - advanced routing
 - agentic components
 
-These should only be introduced when actual requirements justify them.
+These are deferred until actual requirements justify them.
 
 ---
 
-12. Source of Truth
+## 12. Source of Truth
 
-The project uses different sources for different types of truth:
+Different sources govern different truths:
 
 - Git repository → actual source code
-- "PROJECT_STATE.md" → current execution position
-- "EXECUTION_MAP.md" → planned project journey
-- "AI_PROTOCOL.md" → AI execution rules
-- "PROJECT_ARCHITECTURE.md" → intended system architecture
-- "DECISIONS.md" → strategic decisions and their rationale
+- `PROJECT_STATE.md` → current execution position
+- `EXECUTION_MAP.md` → planned project journey
+- `AI_PROTOCOL.md` → execution rules
+- `PROJECT_ARCHITECTURE.md` → intended product architecture
+- `DECISIONS.md` → strategic decisions and rationale
+- runtime/test output → execution evidence
 
-If these sources conflict, follow the conflict-handling rules in "AI_PROTOCOL.md".
+If sources conflict, follow the Conflict Gate in `AI_PROTOCOL.md`. Never silently select one source.
 
 ---
 
-13. Current Architectural Status
+## 13. V3.1 Execution Boundary
 
-Architecture selected:
+This document defines the **product architecture**.
+
+The V3.1 execution framework is separate:
+
+```
+ChatGPT — Director
+    ↓
+Codespaces — Runner
+    ↓
+GitHub — Source of Truth
+```
+
+The execution framework determines how the project is built and verified. It does not become part of the product unless a later requirement explicitly makes it a product feature.
+
+---
+
+## 14. Current Architectural Status
+
+**Selected architecture:**
 
 Stateful Workflow + AI + Deterministic Rules + Human Approval + Audit Log
 
-Implementation status:
+**Implementation status:**
 
 NOT IMPLEMENTED
 
-The architecture is currently a design specification and must not be treated as evidence that the system has already been built.
+This document is a design specification. Its existence is not evidence that the described components have already been built.
+
+Current project execution position is maintained separately in `PROJECT_STATE.md`.
