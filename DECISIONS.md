@@ -1,49 +1,49 @@
-Project Decisions
+# Project Decisions
 
-Project
-
-AI Lead/Data Classification Automation
+**Project:** AI Lead/Data Classification Automation
 
 ---
 
-Purpose
+## Purpose
 
-This file records important project decisions that affect architecture, direction, scope, or significant tradeoffs.
+This file records decisions that affect architecture, direction, scope, or significant tradeoffs.
 
-Routine technical choices do not need to be recorded here unless they materially affect the project.
+Routine technical choices do not need to be recorded unless they materially affect the project.
+
+Strategic decisions belong here. Current execution position belongs in `PROJECT_STATE.md`.
 
 ---
 
-Decision 001 — Architecture
+## Decision 001 — Architecture
 
-Decision
+**Decision**
 
 Use:
 
-Stateful Workflow + AI + Deterministic Rules + Human Approval + Audit Log
+**Stateful Workflow + AI + Deterministic Rules + Human Approval + Audit Log**
 
-Reason
+**Reason**
 
-The system needs AI for interpretation and extraction, but important business logic should remain predictable, testable, and controllable.
+AI is useful for interpretation and extraction, while important business logic should remain predictable, testable, and controllable.
 
 Human approval is retained for uncertain or high-impact cases.
 
-Alternatives Considered
+**Alternatives considered**
 
 - Linear workflow
 - Fully agentic architecture
 
-Status
+**Status**
 
 ACCEPTED
 
 ---
 
-Decision 002 — AI Responsibility
+## Decision 002 — AI Responsibility
 
-Decision
+**Decision**
 
-AI is responsible primarily for:
+AI is primarily responsible for:
 
 - interpretation
 - information extraction
@@ -59,67 +59,67 @@ Deterministic application logic is responsible for:
 - duplicate handling
 - other reproducible business rules
 
-Reason
+**Reason**
 
-This separation reduces unnecessary dependence on probabilistic AI behavior for rules that should be deterministic.
+Rules that should be reproducible should not depend unnecessarily on probabilistic AI behavior.
 
-Status
+**Status**
 
 ACCEPTED
 
 ---
 
-Decision 003 — Human Approval
+## Decision 003 — Human Approval
 
-Decision
+**Decision**
 
 The system must support human approval for uncertain or important cases.
 
-Reason
+**Reason**
 
-Not every business decision should be automated. The system should provide useful automation without removing human control over meaningful decisions.
+The system should automate useful work without removing human control over meaningful business decisions.
 
-Status
-
-ACCEPTED
-
----
-
-Decision 004 — AI Provider Abstraction
-
-Decision
-
-The application will communicate with AI through an internal provider interface rather than coupling the application directly to a single AI provider.
-
-Reason
-
-This keeps the system replaceable and makes future provider changes less disruptive.
-
-Status
+**Status**
 
 ACCEPTED
 
 ---
 
-Decision 005 — Initial Database
+## Decision 004 — AI Provider Abstraction
 
-Decision
+**Decision**
+
+The application communicates with AI through an internal provider interface rather than coupling application logic directly to one provider.
+
+**Reason**
+
+Provider changes should not require redesigning the application.
+
+**Status**
+
+ACCEPTED
+
+---
+
+## Decision 005 — Initial Database
+
+**Decision**
 
 Use SQLite with SQLAlchemy for the initial implementation.
 
-Reason
+**Reason**
 
-The project is a prototype and portfolio system. A lightweight local database reduces unnecessary infrastructure while preserving a path toward PostgreSQL if requirements increase.
+The project is a prototype and portfolio system. A lightweight database avoids unnecessary infrastructure while preserving a migration path toward PostgreSQL if requirements justify it.
 
-Status
+**Status**
 
 ACCEPTED
 
 ---
 
-Decision 006 — Initial Technology Stack
+## Decision 006 — Initial Technology Stack
 
-Decision
+**Decision**
 
 Initial stack:
 
@@ -134,72 +134,192 @@ Initial stack:
 - HTML/CSS/JavaScript
 - AI provider through an abstraction layer
 
-Reason
+**Reason**
 
-The stack provides the capabilities required by the project while keeping the initial implementation manageable and testable.
+The stack provides the capabilities required by the project while remaining manageable and testable.
 
-Status
+**Status**
 
 ACCEPTED
 
 ---
 
-Decision 007 — Evidence-Based Completion
+## Decision 007 — Evidence-Based Completion
 
-Decision
+**Decision**
 
-A feature or project step is not considered complete merely because implementation exists.
+A feature or project step is not complete merely because implementation exists.
 
 Required progression:
 
-IMPLEMENTED → TESTED → VERIFIED → DONE
+**IMPLEMENTED → TESTED → VERIFIED → DONE**
 
-Reason
+**Reason**
 
-The project is intended to demonstrate actual engineering ability, not merely source-code production.
+The project must demonstrate engineering evidence, not merely source-code production.
 
-Status
+**Status**
 
 ACCEPTED
 
 ---
 
-Decision 008 — Complexity Policy
+## Decision 008 — Complexity Policy
 
-Decision
+**Decision**
 
 Do not introduce architectural complexity unless an actual requirement, technical limitation, or measurable benefit justifies it.
 
-Reason
+**Reason**
 
 The project should demonstrate useful engineering rather than complexity for its own sake.
 
-Status
+**Status**
 
 ACCEPTED
 
 ---
 
-Decision 009 — Repository Decision
+## Decision 009 — Repository
 
-Status
+**Decision**
 
-PENDING
+Use the public GitHub repository:
 
-The project repository has not yet been finalized.
+`mrfz011007-creator/ai-lead-classification`
 
-The repository choice must be resolved during Step 7 before implementation begins.
+**Reason**
+
+GitHub is the source of truth for source code, history, and project-state documents.
+
+The repository was established and synchronized during Step 7.
+
+**Status**
+
+ACCEPTED
 
 ---
 
-Decision Recording Rule
+## Decision 010 — Execution Framework
 
-Future decisions should be added only when they:
+**Decision**
 
-- change project direction
-- select between materially different approaches
-- create an important tradeoff
-- are difficult to reverse
-- affect architecture or scope significantly
+Use the frozen V3.1 execution contract as the framework for building and verifying the project.
 
-Routine implementation details should remain in the code and technical documentation rather than being recorded here.
+Core model:
+
+```
+ChatGPT — Director
+Codespaces — Runner
+GitHub — Source of Truth
+```
+
+**Reason**
+
+The project benefits from bounded autonomous execution while keeping strategic decisions under human control.
+
+The execution framework is separate from the product architecture.
+
+**Status**
+
+ACCEPTED
+
+---
+
+## Decision 011 — Runtime Environment
+
+**Decision**
+
+Use GitHub Codespaces as the primary Linux runtime for the Python/FastAPI project.
+
+Termux remains useful for lightweight Android-side Git/file operations but is not treated as the required runtime for the full dependency stack.
+
+**Reason**
+
+The required Python dependency stack has Android/Termux compatibility constraints. A Linux development environment avoids forcing unsupported native builds on the phone.
+
+**Status**
+
+ACCEPTED
+
+---
+
+## Decision 012 — State and Execution Sources of Truth
+
+**Decision**
+
+Use the following separation:
+
+- Git repository → actual source code and history
+- `PROJECT_STATE.md` → current execution position
+- `EXECUTION_MAP.md` → project journey and gates
+- `AI_PROTOCOL.md` → execution rules
+- `PROJECT_ARCHITECTURE.md` → intended product architecture
+- `DECISIONS.md` → strategic decisions and rationale
+- runtime/test output → execution evidence
+
+**Reason**
+
+Separating these responsibilities prevents chat history or one document from becoming an overloaded and unreliable source of truth.
+
+**Status**
+
+ACCEPTED
+
+---
+
+## Decision 013 — Bounded Autonomous Execution
+
+**Decision**
+
+The AI may continue through routine, reversible, technically determinable, and verifiable work without requesting permission at every step.
+
+Execution stops only at:
+
+- `DECISION_REQUIRED`
+- `CONFLICT`
+- `BLOCKED`
+- `BUDGET_EXHAUSTED`
+- `TARGET_COMPLETE`
+
+**Reason**
+
+Stopping after every step creates unnecessary interaction overhead. Unlimited execution without control gates creates unnecessary risk.
+
+**Status**
+
+ACCEPTED
+
+---
+
+## Decision Recording Rule
+
+Add a decision here only when it:
+
+- changes project direction
+- selects between materially different approaches
+- creates an important tradeoff
+- is difficult to reverse
+- significantly affects architecture or scope
+- establishes an execution policy that should remain stable
+
+Routine implementation details belong in code, tests, or technical documentation.
+
+---
+
+## Current Strategic Decisions
+
+The following are currently fixed:
+
+1. Product architecture: stateful workflow with AI, deterministic rules, human approval, and audit log.
+2. AI is primarily an interpretation/extraction layer.
+3. Important business logic remains deterministic.
+4. Human approval remains available for meaningful uncertainty or impact.
+5. AI provider access is abstracted.
+6. Initial database is SQLite + SQLAlchemy.
+7. Completion requires evidence.
+8. Complexity requires justification.
+9. GitHub repository is `mrfz011007-creator/ai-lead-classification`.
+10. V3.1 is the frozen execution framework.
+11. Codespaces is the primary Linux runtime.
+12. GitHub and the five Markdown files have defined source-of-truth roles.
